@@ -80,6 +80,18 @@ uilapse --only src/components --only src/app
 | `--gif-width <px>` | Width of the GIF | `960` |
 | `-v, --verbose` | Print full errors for skipped commits | off |
 
+## Use it from Claude Code
+
+This repo is also a Claude Code plugin with a skill that teaches Claude when and how to run `uilapse`.
+
+```
+/plugin install uilapse --marketplace Suryansh-Codes2209/uilapse
+```
+
+Then ask Claude for things like "film how this app's interface changed over the last three months".
+
+For other agents that read skills, copy the `skills/uilapse` folder into the agent's skills directory.
+
 ## How it works
 
 1. `git log --first-parent` lists the commits, and up to `--frames` of them are picked evenly across the range.

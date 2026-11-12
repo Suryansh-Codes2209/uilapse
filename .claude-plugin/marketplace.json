@@ -1,0 +1,14 @@
+{
+  "name": "uilapse",
+  "description": "Film how a web app's interface changed over its git history, as a time-lapse video.",
+  "owner": {
+    "name": "Suryansh-Codes2209"
+  },
+  "plugins": [
+    {
+      "name": "uilapse",
+      "source": "./",
+      "description": "Film how a web app's interface changed over its git history, as a time-lapse video."
+    }
+  ]
+}

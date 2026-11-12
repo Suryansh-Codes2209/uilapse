@@ -1,0 +1,10 @@
+{
+  "name": "uilapse",
+  "description": "Film how a web app's interface changed over its git history, as a time-lapse video.",
+  "version": "0.1.0",
+  "author": { "name": "Suryansh-Codes2209" },
+  "homepage": "https://github.com/Suryansh-Codes2209/uilapse",
+  "repository": "https://github.com/Suryansh-Codes2209/uilapse",
+  "license": "MIT",
+  "keywords": ["git", "timelapse", "video", "screenshots"]
+}
