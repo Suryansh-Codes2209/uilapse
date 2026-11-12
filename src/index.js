@@ -26,11 +26,15 @@ async function launchBrowser() {
 async function shoot(context, url, { wait, fullPage, file }) {
   const page = await context.newPage();
   try {
+    let response;
     try {
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 20_000 });
+      response = await page.goto(url, { waitUntil: 'networkidle', timeout: 20_000 });
     } catch {
       // Pages that never go quiet (polling, streaming) still get captured.
-      await page.goto(url, { waitUntil: 'load', timeout: 30_000 });
+      response = await page.goto(url, { waitUntil: 'load', timeout: 30_000 });
+    }
+    if (response && response.status() === 404) {
+      throw new Error(`${new URL(url).pathname} does not exist at this commit (404)`);
     }
     // Hide framework dev badges and overlays so they don't appear in the film.
     await page
