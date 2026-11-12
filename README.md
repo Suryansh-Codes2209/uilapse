@@ -8,13 +8,16 @@ npx uilapse
 
 Run it inside any web project. It walks through the history, runs the app as it was at each commit, takes a screenshot, and stitches the screenshots into an MP4 with the date and commit message under each frame.
 
-<!-- Add a demo here: a GIF made by uilapse of a real project. -->
+![The 2048 game's interface evolving from a bare heading to the finished game](docs/demo.gif)
+
+*[2048](https://github.com/gabrielecirulli/2048) by Gabriele Cirulli: 134 commits, filmed with one command.*
 
 ## What it does
 
 - **Runs the real app at each commit.** Plain HTML is served directly. Projects with a `dev` or `start` script are started and captured once they answer.
 - **Follows the project as it changes.** How to run the app is worked out again for every commit, so a history that begins as one HTML file and later becomes a Vite or Next.js app still films from start to finish.
-- **Skips what can't be shown.** Commits that fail to install or start are skipped and listed, and commits that change nothing visible are dropped.
+- **Keeps only what changed.** Each screenshot is compared with the last one kept, and commits that changed nothing you can see are dropped. Commits that fail to install or start are skipped and listed.
+- **Ends on a comparison.** The film closes with the first and latest versions side by side.
 - **Leaves your repo alone.** All work happens in a temporary git worktree that is removed afterwards. Your working tree, branch and uncommitted changes are not touched.
 - **Stays on your machine.** Nothing is uploaded.
 
@@ -71,7 +74,10 @@ uilapse --only src/components --only src/app
 | `--scale <n>` | Pixel density; `2` gives a sharper video | `1` |
 | `--hold <sec>` | Time each commit stays on screen | `0.6` |
 | `--end-hold <sec>` | Time the final frame stays on screen | `2.5` |
-| `--keep-duplicates` | Keep commits that changed nothing visible | off |
+| `--min-change <pct>` | Drop commits that changed less than this share of the picture | `0.1` |
+| `--keep-duplicates` | Keep every commit, even with no visible change | off |
+| `--no-end-card` | Leave out the closing first-versus-latest card | off |
+| `--gif-width <px>` | Width of the GIF | `960` |
 | `-v, --verbose` | Print full errors for skipped commits | off |
 
 ## How it works
@@ -80,13 +86,15 @@ uilapse --only src/components --only src/app
 2. A temporary worktree is checked out at each picked commit.
 3. Dependencies are installed only when `package.json` or the lockfile changed since the last captured commit.
 4. The app is started on a free port. The address is read from what the dev server prints, so frameworks that choose their own port still work.
-5. Playwright takes the screenshot, a caption bar is added, and ffmpeg holds each frame and cross-fades into the next.
+5. Playwright takes the screenshot, and it is kept only if enough of the picture differs from the last kept frame.
+6. A caption bar is added to each kept frame, and ffmpeg holds each one and cross-fades into the next.
 
 ## Limits
 
 - It runs code from your repo's history, including old install scripts. Use it on repos you trust.
 - Old commits often no longer install, because registries and Node versions move on. Those commits are skipped; `--verbose` shows why.
 - Apps that need a database, a login or secret keys to render anything will show an error page or be skipped. `--copy` helps with env files.
+- Pages with random content (a shuffled board, a rotating quote) look different on every load. Raise `--min-change` so that noise is not counted as a change.
 - One page per run. Run it again with a different `--path` for another page.
 - Histories with many dependency changes are slow, because each change means a fresh install.
 

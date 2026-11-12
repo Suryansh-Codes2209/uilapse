@@ -87,7 +87,7 @@ assert.ok(fs.statSync(out.replace('.mp4', '.gif')).size > 5000, 'gif was written
 // 8 commits: 1 has nothing to show, 1 is broken, 1 changes nothing visible,
 // and the revert looks the same as the commit before the break.
 const frames = fs.readdirSync(framesDir).filter((f) => f.endsWith('.png'));
-assert.equal(frames.length, 4, `expected 4 frames, got ${frames.length}`);
+assert.equal(frames.length, 5, `expected 4 frames plus the closing card, got ${frames.length}`);
 
 const probe = execFileSync(
   'ffprobe',
@@ -97,8 +97,8 @@ const probe = execFileSync(
 const info = JSON.parse(probe);
 assert.equal(info.streams[0].codec_name, 'h264');
 assert.equal(info.streams[0].width, 1280);
-assert.equal(info.streams[0].height, 864);
-assert.ok(Math.abs(Number(info.format.duration) - 4.3) < 0.3, `duration ${info.format.duration}`);
+assert.equal(info.streams[0].height, 888);
+assert.ok(Math.abs(Number(info.format.duration) - 5.8) < 0.3, `duration ${info.format.duration}`);
 
 // The user's repo must be left exactly as it was.
 assert.equal(execFileSync('git', ['worktree', 'list'], { cwd: repo, encoding: 'utf8' }).trim().split('\n').length, 1);

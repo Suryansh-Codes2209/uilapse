@@ -38,7 +38,11 @@ How it looks
       --scale <n>         Pixel density, 2 for sharper video (default: 1)
       --hold <sec>        Time each commit stays on screen (default: 0.6)
       --end-hold <sec>    Time the final frame stays on screen (default: 2.5)
-      --keep-duplicates   Keep commits that changed nothing visible
+      --min-change <pct>  Drop commits that changed less than this share of
+                          the picture (default: 0.1)
+      --keep-duplicates   Keep every commit, even with no visible change
+      --no-end-card       Leave out the closing first-versus-now card
+      --gif-width <px>    Width of the GIF (default: 960)
 
   -v, --verbose           Print full errors for skipped commits
   -h, --help              Show this help
@@ -73,6 +77,9 @@ try {
       hold: { type: 'string', default: '0.6' },
       'end-hold': { type: 'string', default: '2.5' },
       'keep-duplicates': { type: 'boolean', default: false },
+      'min-change': { type: 'string', default: '0.1' },
+      'no-end-card': { type: 'boolean', default: false },
+      'gif-width': { type: 'string', default: '960' },
       verbose: { type: 'boolean', short: 'v', default: false },
       help: { type: 'boolean', short: 'h', default: false },
     },
@@ -127,6 +134,9 @@ const opts = {
   hold: num('hold', { min: 0.2 }),
   endHold: num('end-hold', { min: 0.2 }),
   keepDuplicates: v['keep-duplicates'],
+  minChange: num('min-change'),
+  endCard: !v['no-end-card'],
+  gifWidth: even(num('gif-width', { min: 200, integer: true })),
   verbose: v.verbose,
 };
 

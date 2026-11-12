@@ -1,9 +1,8 @@
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { addWorktree, checkout, listCommits, removeWorktree, repoRoot, sample } from './git.js';
-import { addCaptions, renderGif, renderVideo } from './render.js';
+import { changedFraction, composeFrames, renderGif, renderVideo } from './render.js';
 import { depsFingerprint, detect, runCommand, serveStatic, sleep, startServer } from './serve.js';
 
 async function launchBrowser() {
@@ -91,7 +90,7 @@ export async function run(opts, log = console.error) {
 
     const frames = [];
     const skipped = [];
-    let lastHash = null;
+    const diffPage = await browser.newPage();
     let lastDeps = null;
 
     for (let i = 0; i < commits.length; i++) {
@@ -129,12 +128,12 @@ export async function run(opts, log = console.error) {
         const file = path.join(rawDir, `${String(i).padStart(4, '0')}.png`);
         await shoot(context, server.url + opts.path, { wait: opts.wait, fullPage: false, file });
 
-        const hash = createHash('sha1').update(fs.readFileSync(file)).digest('hex');
-        if (hash === lastHash && !opts.keepDuplicates) {
-          log(`${label}  (no visible change)`);
+        const previous = frames[frames.length - 1];
+        const change = previous ? (await changedFraction(diffPage, previous.file, file)) * 100 : 100;
+        if (change < opts.minChange && !opts.keepDuplicates) {
+          log(`${label}  (${change === 0 ? 'no visible change' : `only ${change.toFixed(1)}% changed`})`);
           fs.rmSync(file);
         } else {
-          lastHash = hash;
           frames.push({ file, commit });
           log(`${label}  ✓`);
         }
@@ -147,26 +146,30 @@ export async function run(opts, log = console.error) {
       }
     }
 
+    await diffPage.close();
     await context.close();
     if (!frames.length) {
       throw new Error('No frames were captured. Run with --verbose to see why each commit was skipped.');
     }
 
     log(`Rendering ${frames.length} frames…`);
-    const files = await addCaptions(browser, frames, {
+    const { files, hasEndCard } = await composeFrames(browser, frames, {
       width: opts.width,
       height: opts.height,
       outDir: outFrames,
       scale: opts.scale,
+      endCard: opts.endCard,
+      commitCount: all.length,
     });
+    const timing = { hold: opts.hold, endHold: opts.endHold, hasEndCard, tmpDir: tmp };
 
     const out = path.resolve(opts.out);
     fs.mkdirSync(path.dirname(out), { recursive: true });
-    await renderVideo(files, { out, hold: opts.hold, endHold: opts.endHold, tmpDir: tmp });
+    await renderVideo(files, { out, ...timing });
     const outputs = [out];
     if (opts.gif) {
       const gif = out.replace(/\.[^.]+$/, '') + '.gif';
-      await renderGif(files, { out: gif, hold: opts.hold, endHold: opts.endHold, tmpDir: tmp, gifWidth: Math.min(opts.width, 720) });
+      await renderGif(files, { out: gif, ...timing, gifWidth: Math.min(opts.width, opts.gifWidth) });
       outputs.push(gif);
     }
     return { outputs, frames: frames.length, skipped, total: commits.length };
