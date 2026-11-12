@@ -1,0 +1,44 @@
+{
+  "name": "uilapse",
+  "version": "0.1.0",
+  "description": "Turn a repo's git history into a time-lapse video of its interface evolving, commit by commit.",
+  "type": "module",
+  "bin": {
+    "uilapse": "bin/uilapse.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/e2e.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "git",
+    "timelapse",
+    "time-lapse",
+    "screenshot",
+    "video",
+    "ui",
+    "history",
+    "playwright",
+    "ffmpeg"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Suryansh-Codes2209/uilapse.git"
+  },
+  "homepage": "https://github.com/Suryansh-Codes2209/uilapse#readme",
+  "bugs": {
+    "url": "https://github.com/Suryansh-Codes2209/uilapse/issues"
+  }
+}
